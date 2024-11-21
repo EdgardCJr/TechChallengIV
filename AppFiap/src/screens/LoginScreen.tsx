@@ -3,17 +3,17 @@ import { TextInput, Button, View, StyleSheet, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen: React.FC = ({ navigation }: any) => {
-  const [email, setEmail] = useState("");
+  const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    fetch("https://api.example.com/auth/login", {
+    fetch("http://localhost:3000/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, password }),
     })
       .then((response) => response.json())
-      .then(async (data) => {
+      .then(async (data) => { 
         if (data.token) {
           await AsyncStorage.setItem("token", data.token);
           Alert.alert("Login successful!");
@@ -30,8 +30,8 @@ const LoginScreen: React.FC = ({ navigation }: any) => {
       <TextInput
         style={styles.input}
         placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
+        value={username}
+        onChangeText={setUserName}
         keyboardType="email-address"
       />
       <TextInput
@@ -47,7 +47,11 @@ const LoginScreen: React.FC = ({ navigation }: any) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+  container: { flex: 1,
+               padding: 16,
+               backgroundColor: "#fff",
+               justifyContent: "center",
+               alignItems: "center" },
   input: {
     height: 40,
     borderColor: "#ccc",

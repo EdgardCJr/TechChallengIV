@@ -19,7 +19,7 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const AdminTabs = () => (
-  <Tab.Navigator>
+  <Tab.Navigator id={undefined}>
     <Tab.Screen name="Posts" component={AdminDashboardScreen} />
     <Tab.Screen name="Teachers" component={TeachersListScreen} />
     <Tab.Screen name="Students" component={StudentsListScreen} />
@@ -29,7 +29,7 @@ const AdminTabs = () => (
 const App: React.FC = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="Login" id={undefined}>
         {/* Login */}
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
 
