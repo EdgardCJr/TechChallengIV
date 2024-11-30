@@ -1,23 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextInput, Button, View, StyleSheet, Alert } from "react-native";
+import Api from "../services/apiService"; // Import your API service
+import { useAuth } from '../services/authContext';
 
-const CreatePostScreen: React.FC = () => {
+const CreatePostScreen: React.FC = ({ navigation }: any) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
+  const { token, user } = useAuth();
 
-  const handleSubmit = () => {
-    const newPost = { title, content, author };
-    fetch("https://api.example.com/posts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newPost),
-    })
-      .then((response) => {
-        if (response.ok) Alert.alert("Post created successfully!");
-        else throw new Error("Failed to create post");
-      })
-      .catch(() => Alert.alert("Error creating post"));
+  useEffect(() => {
+    // Set author from user object when it's available
+    if (user && user.username) {
+      setAuthor(user.username); 
+    }
+  }, [user]);
+
+  const handleSubmit = async () => {
+    try {
+      const newPost = { title, content, author };
+      await Api.post("/posts", newPost, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add Authorization header
+          "Content-Type": "application/json",
+        },
+      });
+      Alert.alert("Post created successfully!");
+      navigation.goBack(); // Go back to the previous screen
+    } catch (error) {
+      Alert.alert("Error creating post", error.message);
+    }
   };
 
   return (
@@ -39,7 +51,8 @@ const CreatePostScreen: React.FC = () => {
         style={styles.input}
         placeholder="Author"
         value={author}
-        onChangeText={setAuthor}
+        onChangeText={(text) => setAuthor(text)} 
+        editable={false}
       />
       <Button title="Create Post" onPress={handleSubmit} />
     </View>

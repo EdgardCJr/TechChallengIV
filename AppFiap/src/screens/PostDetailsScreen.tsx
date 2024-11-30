@@ -13,6 +13,7 @@ const PostDetailsScreen: React.FC = () => {
   const route = useRoute<RouteProp<{ params: { postId: string } }>>();
   const [post, setPost] = useState<Post | null>(null);
 
+
   useEffect(() => {
     const { postId } = route.params;
     fetch(`https://api.example.com/posts/${postId}`)

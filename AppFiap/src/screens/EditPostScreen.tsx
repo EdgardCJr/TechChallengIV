@@ -1,74 +1,96 @@
-import React, { useEffect, useState } from "react";
-import { RouteProp, useRoute } from "@react-navigation/native";
-import { TextInput, Button, View, StyleSheet, Alert } from "react-native";
+import React, {useEffect, useState } from "react";
+import { FlatList, TouchableOpacity, TextInput, Button, View, StyleSheet, Alert } from "react-native";
+import Api from "../services/apiService"; // Import your API service
+import { useAuth } from '../services/authContext';
 
-const EditPostScreen: React.FC = () => {
-  const route = useRoute<RouteProp<{ params: { postId: string } }>>();
+interface Post {
+  _id: string
+  title: string;
+  author: string;
+  content: string;
+}
+
+const CreatePostScreen: React.FC = ({ navigation }: any) => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const { token } = useAuth(); 
+  const [refreshing, setRefreshing] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
-
-  useEffect(() => {
-    const { postId } = route.params;
-    fetch(`https://api.example.com/posts/${postId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setTitle(data.title);
-        setContent(data.content);
-        setAuthor(data.author);
+  
+  const loadPosts = async () => {
+    try {
+      const response = await Api.get("/posts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-  }, [route.params]);
-
-  const handleSave = () => {
-    const updatedPost = { title, content, author };
-    fetch(`https://api.example.com/posts/${route.params.postId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedPost),
-    })
-      .then((response) => {
-        if (response.ok) Alert.alert("Post updated successfully!");
-        else throw new Error("Failed to update post");
-      })
-      .catch(() => Alert.alert("Error updating post"));
+      console.log(posts);
+      setPosts(response.data);
+    } catch (error) {
+      Alert.alert("Error loading posts", error.message);
+    }
   };
 
+  const handlePut = async (postId: string) => {
+    try {
+      await Api.put(`/posts/${postId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, 
+          "Content-Type": "application/json",
+        },
+      });
+      Alert.alert("Post deletado!");
+      navigation.goBack(); 
+    } catch (error) {
+      console.log(token, postId)
+      Alert.alert("Error alterando post", token);
+    }
+  };
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Title"
-        value={title}
-        onChangeText={setTitle}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Content"
-        value={content}
-        onChangeText={setContent}
-        multiline
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Author"
-        value={author}
-        onChangeText={setAuthor}
-      />
-      <Button title="Save Changes" onPress={handleSave} />
-    </View>
+    <FlatList
+      data={posts}
+      keyExtractor={(item) => item._id}
+      renderItem={({ item }) => (
+        <TouchableOpacity style={styles.postItem}>
+          <TextInput style={styles.title}
+                      placeholder={item.title}
+                      value={title}
+                      onChangeText={setTitle}/>
+          <TextInput style={styles.description}
+                  placeholder={item.content}
+                  value={content}
+                  onChangeText={setContent}
+                  multiline/>
+          <TextInput style={styles.author}
+                    placeholder={item.author}
+                    value={author}
+                    onChangeText={setAuthor}/>
+          <View style={styles.buttons}>
+            <Button title="Update" onPress={() => handlePut(item._id)} color="#555" />
+          </View>
+        </TouchableOpacity>
+      )}
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  input: {
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    marginBottom: 16,
+  postItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
   },
+  title: { fontSize: 18, fontWeight: "bold" },
+  author: { fontSize: 14, color: "#555" },
+  description: { fontSize: 14, color: "#777" },
+  buttons: { flexDirection: "row", justifyContent: "space-between", marginTop: 8 },
 });
 
-export default EditPostScreen;
+
+export default CreatePostScreen;

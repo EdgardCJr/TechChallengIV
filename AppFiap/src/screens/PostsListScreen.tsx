@@ -1,55 +1,67 @@
 import React, { useEffect, useState } from "react";
-import { FlatList, TextInput, Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { FlatList, Text, View, StyleSheet, TouchableOpacity, Alert, Button } from "react-native";
+import Api from "../services/apiService";
+import { useAuth } from '../services/authContext';
 
 interface Post {
   id: string;
   title: string;
   author: string;
-  description: string;
+  content: string;
 }
 
-const PostsListScreen: React.FC = () => {
+const PostsListScreen: React.FC = ({ navigation }: any) => {
+  const { token } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
-  const [search, setSearch] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    // Fetch posts from backend
-    fetch("https://api.example.com/posts")
-      .then((response) => response.json())
-      .then((data) => {
-        setPosts(data);
-        setFilteredPosts(data);
+  const renderFooter = () => (
+    <View style={styles.footer}>
+      <Button title="Area Administrativa" onPress={() => navigation.navigate("CreateTeacher")} />
+    </View>
+  );
+
+  const loadPosts = async () => {
+    try {
+      const response = await Api.get(("/posts"), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-  }, []);
-
-  const handleSearch = (text: string) => {
-    setSearch(text);
-    const filtered = posts.filter((post) =>
-      post.title.toLowerCase().includes(text.toLowerCase())
-    );
-    setFilteredPosts(filtered);
+      setPosts(response.data);
+    } catch (error) {
+      Alert.alert("Problemas ao carregar os posts", error.message);
+      console.error("Error details:", error);
+    }
   };
+     useEffect(() => { 
+       loadPosts();
+     }, []); 
+   
+     useEffect(() => { 
+       setFilteredPosts(posts);
+    }, [posts]);
 
-  return (
+     return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search posts..."
-        value={search}
-        onChangeText={handleSearch}
-      />
       <FlatList
         data={filteredPosts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.postItem}>
             <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.author}>By: {item.author}</Text>
-            <Text style={styles.description}>{item.description}</Text>
+            <Text style={styles.description}>{item.content }</Text>
+            <Text style={styles.author}>De: {item.author}</Text>
           </TouchableOpacity>
         )}
-      />
+        ListFooterComponent={renderFooter}
+        refreshing={refreshing}
+        onRefresh={() => {
+          setRefreshing(true);
+          loadPosts().then(() => setRefreshing(false));
+        }}
+        />
     </View>
   );
 };
@@ -73,6 +85,13 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: "bold" },
   author: { fontSize: 14, color: "#555" },
   description: { fontSize: 14, color: "#777" },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around', 
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
+  },
 });
 
 export default PostsListScreen;

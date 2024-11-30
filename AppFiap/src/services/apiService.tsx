@@ -1,28 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from 'axios';
 
-const fetchProtectedData = async (url: string) => {
-  try {
-    const token = await AsyncStorage.getItem("token");
-    if (!token) {
-      throw new Error("Token não encontrado. Faça login novamente.");
-    }
+const Api = axios.create({
+  baseURL: 'http://192.168.68.119:3000/', 
+});
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Adiciona o token ao cabeçalho
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Falha na requisição");
-    }
-
-    return await response.json(); // Retorna os dados
-  } catch (error) {
-    throw new Error(error.message); // Retorna erro
-  }
-};
-
-export default fetchProtectedData;
+export default Api;
