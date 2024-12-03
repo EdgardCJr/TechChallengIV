@@ -42,13 +42,13 @@ const CreateUserScreen: React.FC = ({ navigation }: any) => {
         <View style={styles.container}>
             <TextInput
                 style={styles.input}
-                placeholder="Username"
+                placeholder="Usuário"
                 value={username}
                 onChangeText={setUsername}
             />
             <TextInput
                 style={styles.input}
-                placeholder="Password"
+                placeholder="Senha"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
