@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { TextInput, Button, View, StyleSheet, Alert } from "react-native";
-import Api from "../services/apiService"; // Import your API service
+import Api from "../services/apiService";
 import { useAuth } from '../services/authContext';
+import { useUpdateContext } from '../Components/createContext';
 
 const CreatePostScreen: React.FC = ({ navigation }: any) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
   const { token, user } = useAuth();
+  const { updatePosts } = useUpdateContext();
 
   useEffect(() => {
     // Set author from user object when it's available
@@ -25,10 +27,11 @@ const CreatePostScreen: React.FC = ({ navigation }: any) => {
           "Content-Type": "application/json",
         },
       });
-      Alert.alert("Post created successfully!");
+      Alert.alert("Publicação realizada!");
+      updatePosts();
       navigation.goBack(); // Go back to the previous screen
     } catch (error) {
-      Alert.alert("Error creating post", error.message);
+      Alert.alert("Erro ao criar postagem", error.message);
     }
   };
 
@@ -36,13 +39,13 @@ const CreatePostScreen: React.FC = ({ navigation }: any) => {
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="Title"
+        placeholder="Titulo da Postagem"
         value={title}
         onChangeText={setTitle}
       />
       <TextInput
         style={styles.input}
-        placeholder="Content"
+        placeholder="Conteudo da Postagem"
         value={content}
         onChangeText={setContent}
         multiline
@@ -54,7 +57,7 @@ const CreatePostScreen: React.FC = ({ navigation }: any) => {
         onChangeText={(text) => setAuthor(text)} 
         editable={false}
       />
-      <Button title="Create Post" onPress={handleSubmit} />
+      <Button title="Postar!" onPress={handleSubmit} />
     </View>
   );
 };

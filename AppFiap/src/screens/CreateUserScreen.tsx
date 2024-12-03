@@ -1,68 +1,88 @@
-import React, { useState, useEffect } from "react";
-import { TextInput, Button, View, StyleSheet, Alert } from "react-native";
+import React, { useState } from "react";
+import { TextInput, Button, View, StyleSheet, Alert } from "react-native"; // Import Picker
+import { Picker } from '@react-native-picker/picker'
 import Api from "../services/apiService";
 import { useAuth } from "../services/authContext";
 
-interface User {
-  _id: string;
-  username: string;
-  password: string;
-  role: string;
-}
 const CreateUserScreen: React.FC = () => {
-  const [Usuario, setUsuario] = useState<User[]>([]);
-  const { token } = useAuth();
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [role, setRole] = useState("Aluno");
+    const { token } = useAuth();
 
-  const handleEditUser = async () => {
-    try {
-      const response = await Api.put(("/user"), {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUsuario(response.data);
-    } catch (error) {
-      Alert.alert("Problemas ao carregar os usuários", error.message);
-      console.error("Error details:", error);
-    }
-  };
+    const handleCreateUser = async () => {
+        try {
+            const newUser = { username, password, role };
+            const response = await Api.post("/register", newUser, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
 
-  useEffect(() => {
-    if (user && user.username) {
-      setAuthor(user.username); 
-    }
-  }, [user]);
+            if (response.status === 201) {
+                Alert.alert("Usuário criado com sucesso!");
+                setUsername("");
+                setPassword("");
+                setRole("");
+            } 
+            if (response.status === 222) {
+              Alert.alert("Usuário ja existe, tente outro!");
+              setUsername("");
+              setPassword("");
+              setRole("");
+              }else {
+                Alert.alert("Falha ao criar usuário", response.data.message || "Erro desconhecido");
+            }
+        } catch (error) {
+            Alert.alert("Erro ao criar usuário", error.message);
+            console.log("Error details:", { username, password, role });
+        }
+    };
 
-  return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-      <Button title="Create Student" onPress={handleCreateStudent} />
-    </View>
-  );
+    return (
+        <View style={styles.container}>
+            <TextInput
+                style={styles.input}
+                placeholder="Username"
+                value={username}
+                onChangeText={setUsername}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+            />
+            <Picker
+                selectedValue={role}
+                style={styles.picker}
+                onValueChange={(itemValue) => setRole(itemValue)}
+            >
+                <Picker.Item label="Professor" value="Professor" />
+                <Picker.Item label="Aluno"     value="Aluno" />
+            </Picker>
+            <Button title="Criar Usuário" onPress={handleCreateUser} />
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  input: {
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    marginBottom: 16,
-  },
+    container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+    input: {
+        height: 40,
+        borderColor: "#ccc",
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 8,
+        marginBottom: 16,
+    },
+    picker: {
+        height: 40,
+        width: "100%",
+        marginBottom: 16,
+    },
 });
 
-export default CreateStudentScreen;
+export default CreateUserScreen;

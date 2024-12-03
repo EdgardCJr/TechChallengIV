@@ -1,96 +1,113 @@
-import React, {useEffect, useState } from "react";
-import { FlatList, TouchableOpacity, TextInput, Button, View, StyleSheet, Alert } from "react-native";
-import Api from "../services/apiService"; // Import your API service
-import { useAuth } from '../services/authContext';
+import React, { useEffect, useState } from "react";
+import { TextInput, Button, View, StyleSheet, Alert, Text } from "react-native";
+import Api from "../services/apiService";
+import { useAuth } from "../services/authContext";
+import { RouteProp, useRoute } from "@react-navigation/native";
+import { useUpdateContext } from "../Components/createContext";
 
 interface Post {
-  _id: string
-  title: string;
-  author: string;
-  content: string;
+    _id: string;
+    title: string;
+    author: string;
+    content: string;
 }
 
-const CreatePostScreen: React.FC = ({ navigation }: any) => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const { token } = useAuth(); 
-  const [refreshing, setRefreshing] = useState(false);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [author, setAuthor] = useState("");
-  
-  const loadPosts = async () => {
-    try {
-      const response = await Api.get("/posts", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(posts);
-      setPosts(response.data);
-    } catch (error) {
-      Alert.alert("Error loading posts", error.message);
+const EditPostScreen: React.FC = ({ navigation }: any) => {
+    const route = useRoute<RouteProp<{ params: { postId: string } }>>();
+    const { token } = useAuth();
+    const [post, setPost] = useState<Post | null>(null);
+    const [title, setTitle] = useState("");
+    const [content, setContent] = useState("");
+    const [author, setAuthor] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
+    const { updatePosts } = useUpdateContext();
+
+    useEffect(() => {
+        const { postId } = route.params;
+
+        const loadPost = async () => {
+            try {
+                const response = await Api.get(`/posts/${postId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setPost(response.data);
+                setTitle(response.data.title);
+                setContent(response.data.content);
+                setAuthor(response.data.author);
+                setIsLoading(false);
+            } catch (error) {
+                Alert.alert("Error loading post", error.message);
+                setIsLoading(false);
+            }
+        };
+
+        loadPost();
+    }, [route.params]);
+
+
+    const handlePut = async () => {
+        try {
+            if (post && post._id) { // Verificar se post e post._id existem
+                await Api.put(`/posts/${post._id}`, { title, content, author }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+                Alert.alert("Postagem atualizada!");
+                updatePosts();
+                navigation.goBack();
+            } else {
+                Alert.alert("Erro", "Post não encontrado ou dados inválidos.");
+            }
+        } catch (error) {
+            Alert.alert("Erro ao atualizar post", error.message);
+        }
+    };
+
+    if (isLoading || !post) {
+        return <Text>Carregando...</Text>;
     }
-  };
 
-  const handlePut = async (postId: string) => {
-    try {
-      await Api.put(`/posts/${postId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`, 
-          "Content-Type": "application/json",
-        },
-      });
-      Alert.alert("Post deletado!");
-      navigation.goBack(); 
-    } catch (error) {
-      console.log(token, postId)
-      Alert.alert("Error alterando post", token);
-    }
-  };
-
-  useEffect(() => {
-    loadPosts();
-  }, []);
-
-  return (
-    <FlatList
-      data={posts}
-      keyExtractor={(item) => item._id}
-      renderItem={({ item }) => (
-        <TouchableOpacity style={styles.postItem}>
-          <TextInput style={styles.title}
-                      placeholder={item.title}
-                      value={title}
-                      onChangeText={setTitle}/>
-          <TextInput style={styles.description}
-                  placeholder={item.content}
-                  value={content}
-                  onChangeText={setContent}
-                  multiline/>
-          <TextInput style={styles.author}
-                    placeholder={item.author}
-                    value={author}
-                    onChangeText={setAuthor}/>
-          <View style={styles.buttons}>
-            <Button title="Update" onPress={() => handlePut(item._id)} color="#555" />
-          </View>
-        </TouchableOpacity>
-      )}
-    />
-  );
+    return (
+        <View style={styles.container}>
+            <TextInput
+                style={styles.title}
+                value={title}
+                onChangeText={setTitle}
+                placeholder="Título"
+            />
+            <TextInput
+                style={styles.description}
+                value={content}
+                onChangeText={setContent}
+                placeholder="Conteúdo"
+                multiline
+            />
+            <TextInput
+                style={styles.author}
+                value={author}
+                onChangeText={setAuthor}
+                placeholder="Autor"
+            />
+            <View style={styles.buttons}>
+                <Button title="Update" onPress={handlePut} color="#556" />
+            </View>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  postItem: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  title: { fontSize: 18, fontWeight: "bold" },
-  author: { fontSize: 14, color: "#555" },
-  description: { fontSize: 14, color: "#777" },
-  buttons: { flexDirection: "row", justifyContent: "space-between", marginTop: 8 },
+    container: {
+        flex: 1,
+        padding: 16,
+    },
+    title: { fontSize: 18, fontWeight: "bold", marginBottom: 8 },
+    author: { fontSize: 14, color: "#555", marginBottom: 8 },
+    description: { fontSize: 14, color: "#777", marginBottom: 8 },
+    buttons: { marginTop: 16 },
 });
 
-
-export default CreatePostScreen;
+export default EditPostScreen;
