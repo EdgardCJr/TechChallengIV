@@ -6,7 +6,6 @@ import { AuthProvider } from './src/services/authContext';
 import { UpdateProvider } from "./src/Components/createContext";
 
 import LoginScreen from "./src/screens/LoginScreen";
-import PostsListScreen from "./src/screens/PostsListScreen";
 import PostDetailsScreen from "./src/screens/PostDetailsScreen";
 import CreatePostScreen from "./src/screens/CreatePostScreen";
 import EditPostScreen from "./src/screens/EditPostScreen";
