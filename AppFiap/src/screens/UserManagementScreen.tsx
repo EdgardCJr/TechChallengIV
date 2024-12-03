@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FlatList, Text, View, StyleSheet, TouchableOpacity, Button, Alert, ActivityIndicator } from "react-native";
+import { FlatList, Text, View, StyleSheet, SafeAreaView, Button, Alert, ActivityIndicator } from "react-native";
 import Api from "../services/apiService";
 import { useAuth } from "../services/authContext";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -60,7 +60,13 @@ const UserManagementScreen: React.FC = () => {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.createUserButtonContainer}> 
+                <Button
+                    title="Criar Usuário" onPress={() => navigation.navigate("CreateUser")}
+                />
+            </View>
+            <View style={styles.container}>
             <FlatList
                 data={users}
                 keyExtractor={(item) => item._id}
@@ -69,20 +75,14 @@ const UserManagementScreen: React.FC = () => {
                         <Text style={styles.userName}>{item.username}</Text>
                         <Text style={styles.userRole}>Role: {item.role}</Text>
                         <View style={styles.buttons}>
-                            <Button
-                                title="Edit"
-                                onPress={() => navigation.navigate("EditUser", { userId: item._id })}
-                            />
-                            <Button
-                                title="Delete"
-                                onPress={() => handleUserDelete(item._id)}
-                                color="red"
-                            />
+                            <Button title="Edit" onPress={() => navigation.navigate("EditUser", { userId: item._id })} />
+                            <Button title="Delete" onPress={() => handleUserDelete(item._id)} color="red" />
                         </View>
                     </View>
                 )}
             />
-        </View>
+            </View>
+        </SafeAreaView>
     );
 };
 
@@ -97,6 +97,10 @@ const styles = StyleSheet.create({
   userRole: { fontSize: 14, color: "#555" },
   buttons: { marginTop: 8, flexDirection: "row", justifyContent: "space-between" },
   createUserButton: { marginTop: 16 },
+  createUserButtonContainer: {
+    padding: 16,
+    alignItems: "center",
+},
 });
 
 export default UserManagementScreen;

@@ -4,7 +4,7 @@ import { Picker } from '@react-native-picker/picker'
 import Api from "../services/apiService";
 import { useAuth } from "../services/authContext";
 
-const CreateUserScreen: React.FC = () => {
+const CreateUserScreen: React.FC = ({ navigation }: any) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [role, setRole] = useState("Aluno");
@@ -25,14 +25,12 @@ const CreateUserScreen: React.FC = () => {
                 setUsername("");
                 setPassword("");
                 setRole("");
-            } 
-            if (response.status === 222) {
+                navigation.goBack();
+            } else if (response.status === 202) {
               Alert.alert("Usuário ja existe, tente outro!");
               setUsername("");
               setPassword("");
               setRole("");
-              }else {
-                Alert.alert("Falha ao criar usuário", response.data.message || "Erro desconhecido");
             }
         } catch (error) {
             Alert.alert("Erro ao criar usuário", error.message);

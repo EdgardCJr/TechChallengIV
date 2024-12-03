@@ -88,7 +88,7 @@ const AdminDashboardScreen: React.FC = ({ navigation }: any) => {
                 }}
             />
             <View style={styles.buttonsContainer}>
-                <Button title="Criar Post" onPress={() => navigation.navigate("CreatePost")} />
+                <Button title="Criar Postagem" onPress={() => navigation.navigate("CreatePost")} />
                 <Button title="Usuários" onPress={() => navigation.navigate("AdminUser")} />
             </View>
         </View>

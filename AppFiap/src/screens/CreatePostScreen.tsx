@@ -12,7 +12,6 @@ const CreatePostScreen: React.FC = ({ navigation }: any) => {
   const { updatePosts } = useUpdateContext();
 
   useEffect(() => {
-    // Set author from user object when it's available
     if (user && user.username) {
       setAuthor(user.username); 
     }
