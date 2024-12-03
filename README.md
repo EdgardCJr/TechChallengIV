@@ -68,7 +68,7 @@ Utiliza hooks do React como `useState` e `useEffect` para gerenciar os dados do 
 ### **Login:**
 -Na tela inicial (LoginScreen), os usuários inserem suas credenciais para acessar o aplicativo.
 -Em caso de uso da base ja chamada na aplicação Backend
--
+
 - Para acesso a todas as funcionalidade
 
 ```bash
