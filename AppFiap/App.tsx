@@ -26,14 +26,6 @@ const MainTabs = () => (
   </Tab.Navigator>
 );
 
-const AdminTabs = () => (
-  <Tab.Navigator id={undefined}>
-    <Tab.Screen name="AdminUser" component={UserManagementScreen} />
-    <Tab.Screen name="CreateUser" component={CreateUserScreen} />
-    <Tab.Screen name="EditUser" component={EditUserScreen} />
-  </Tab.Navigator>
-);
-
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -44,9 +36,6 @@ const App: React.FC = () => {
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Home" component={MainPostListScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Main" component={MainTabs} options={{ title: "Home", headerShown: false }} />
-
-            <Stack.Screen name="PostsListScreen" component={PostsListScreen} options={{ title: "Posts" }} />
-            <Stack.Screen name="PostDetailsScreen" component={PostDetailsScreen} options={{ title: "Detalhes" }} />
 
             <Stack.Screen name="CreatePost" component={CreatePostScreen} options={{ title: "Criar Postagem" }} />
             <Stack.Screen name="EditPost" component={EditPostScreen} options={{ title: "Editar postagem" }} />
